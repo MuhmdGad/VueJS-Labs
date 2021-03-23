@@ -1,0 +1,29 @@
+*{
+    padding: 0px;
+    margin: 0px;
+}
+.body {
+  background-color: aliceblue;
+  margin: 20px;
+  
+}
+.more {
+  color: green;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.less {
+  color: red;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.card {
+  box-shadow: 2px 2px 2px grey;
+  background-color: -webkit-liner-gradient(top, white 70%, lightgrey);
+}
+.card:hover {
+  background-color: -webkit-liner-gradient(top, grey -30%, white);
+}
+

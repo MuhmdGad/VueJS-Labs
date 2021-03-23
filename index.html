@@ -2,66 +2,211 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VueJS Demo</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous" />
-    <script src="./js/vue.js"></script>
-    <script src="./js/products.js"></script>
-    <style>
-        body{
-            padding-top:15px;
-        }
+  <script src="js/vue.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+    integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+  <link rel="stylesheet" href="./css/main.css">
+  <link rel="stylesheet" href="./css/normalize.css">
+  <title>Book Store</title>
+  <style>
+  .card-img-top{
+    justify-content: center;
+    margin: 10px 10px 10px 10px;
+    position: relative;
+    width: 300px ;
+    height: 350px;
+  }    
 
-
-    </style>
+  </style>
 </head>
 
 <body>
-    <div class="container" id="maindiv">
-        <div class="row bg-dark text-light justify-content-between p-2 align-items">
-            <a href="#" style="color: rgb(240, 225, 12); text-decoration: none">Products</a>
-            <div class="d-flex align-items-baseline">
-                <p class="mx-2">0 items | items with total price</p>
-                <button class="btn btn-primary">Show Chart</button>
-            </div>
+
+
+  <div class="container" id="box-container">
+    <nav class="navbar navbar-dark bg-dark mb-5 d-flex justify-content-between">
+      <a href="#" style="color: yellow" @click="isvisible = true" v-on:click.prevent>Books</a>
+      <div style="color: white;">
+        <span v-text="store.items.length"></span>
+        <template v-if="store.items.length==0 || store.items.length > 1"> Items</template>
+        <template v-if="store.items.length == 1"> Item</template>
+        to the book-box with total-price {{currencyFormat(gettotalprice())}} <button class="btn btn-primary"
+          @click="isvisible = false">Show Books</button>
+      </div>
+    </nav>
+
+
+    <div class="card-container m-5" v-if="isvisible == true">
+      <div class="row">
+        <div class="card mb-2 col-4" style="width: 18rem;" v-for="book in books" :key="book.isbn">
+          <img class="card-img-top" v-bind:src="book.image" alt="Card image cap" v-bind:title="book.author">
+          <div class="card-body">
+            <h5 class="card-title text-center"><a :href="book.url" class="card-link">{{book.title}}</a></h5>
+            <p class="card-text">{{book.author}}</p>
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">{{book.category}}</li>
+            <li class="list-group-item">{{book.subtitle}}</li>
+            <li class="list-group-item">{{currencyFormat(book.price)}}</li>
+            <li class="list-group-item"><span
+                :class="[book.pages>=50?'more':'', book.pages<50?'less':'']">{{book.pages}}</span> pages</li>
+            <li class="list-group-item">{{book.isbn}}</li>
+
+          </ul>
+          <div class="card-body">
+            <a href="#" class="card-link" v-on:click.prevent="addtolist(book)">ADD To List</a>
+          </div>
         </div>
-        <!--banner-->
-        <div class="row justify-content-center">
-            <div class="card" style="width:24rem;margin:0.2rem" v-for="product in products">
-                <img :src="product.image" :title="product.name"  :alt="product.name">
-                <h3 class="text-center mt-1"> {{product.name}}</h3>
-                <p class="text-justify"> {{product.description}} </p>
-                <div class="card-footer" d-flex jusfiy-content>
-                <p>Stock: <span> {{product.instock}} </span> </p>
-                <button class="btn btn-primary">Add To Chart</button>
-                </div>
-
-
-
-
-            </div>
-        </div>
+      </div>
     </div>
-    <!-- Container-->
 
-    <script>
-        const app = Vue.createApp({
-            data: () => ({
-                products: products,
-            }),
-            methos: {},
-        });
-        app.mount('#maindiv')
+    <div v-if="isvisible == false" class="book-box">
+      <h2 class="text-danger text-center mt-5" v-if="store.items.length == 0">Sorry .. Your cart is Empty, Please add
+        Books !!</h2>
+      <table class="table table-dark" v-if="store.items.length > 0">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Title</th>
+            <th scope="col">Author</th>
+            <th scope="col">Pages</th>
+            <th scope="col">Category</th>
+            <th scope="col">Subtitle</th>
+            <th scope="col">Quntity</th>
+            <th scope="col">isbn</th>
+            <th scope="col">Unit Price</th>
+            <th scope="col">Total Price</th>
+            <th scope="col">Update</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in store.items" :key="item.index">
+            <th scope="col">{{index+1}}</th>
+            <th scope="col">{{item.book.title}}</th>
+            <th scope="col">{{item.book.author}}</th>
+            <th scope="col">{{item.book.pages}}</th>
+            <th scope="col">{{item.book.category}}</th>
+            <th scope="col">{{item.book.subtitle}}</th>
+            <th scope="col">{{item.quantity}}</th>
+            <th scope="col">{{item.book.isbn}}</th>
+            <th scope="col">{{currencyFormat(item.book.price)}}</th>
+            <th scope="col">{{currencyFormat(item.book.price*item.quantity)}}</th>
+            <th scope="col">
+              <button class="btn btn-success mb-1" @click="increase(item)">+</button>
+              <button class="btn btn-danger mb-5" @click="decrease(item)">-</button>
+            </th>
+          </tr>
+
+          <tr>
+            <th colspan="4"> Total </th>
+            <th colspan="2"> {{currencyFormat(gettotalprice())}} </th>
+          </tr>
+          <th colspan="4"> Taxes </th>
+          <th colspan="2"> {{currencyFormat(gettotalprice() * 0.1)}} </th>
+          </tr>
+          <th colspan="4">
+            Final Total Price
+          </th>
+          <th colspan="2">
+            {{currencyFormat(gettotalprice()*0.1 + gettotalprice())}}
+          </th>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous">
     </script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+    integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous">
+    </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"
+    integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF" crossorigin="anonymous">
+    </script>
+  <script src="./js/books.js"></script>
+  
+  <script>
+    const app = Vue.createApp({
+      data: () => ({
+        books: books,
+        isvisible: true,
+        store: {
+          items: []
+        }
 
-    <!-- JavaScript Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
-        crossorigin="anonymous"></script>
+      }),
+      methods: {
+        currencyFormat(val) {
+          let formatter = Intl.NumberFormat("ar-SA", {
+            style: "currency",
+            currency: "SAR",
+            minimumFractionDigits: 0
+          })
+          return formatter.format(val);
+        },
+        addtolist(book) {
+          if (!this.checkexistence(book)) {
+            this.store.items.push({
+              book: book,
+              quantity: 1
+            });
+          } else {
+            let targetitem;
+            for (let i = 0; i < this.store.items.length; i++) {
+              if (this.store.items[i].book.isbn == book.isbn) {
+                targetitem = this.store.items[i];
+                break;
+              }
+            }
+            targetitem.quantity++;
+          }
+        },
+        checkexistence(book) {
+          for (let i = 0; i < this.store.items.length; i++) {
+            if (this.store.items[i].book.isbn == book.isbn) {
+              return true;
+            }
+
+          }
+        },
+        increase(item) {
+          item.quantity++;
+        },
+        decrease(item) {
+          item.quantity--;
+          if (item.quantity == 0) {
+            let ind;
+            for (let i = 0; i < this.store.items.length; i++) {
+
+              if (this.store.items[i].book.isbn == item.book.isbn) {
+                ind = i;
+                break;
+              }
+            }
+            this.store.items.splice(ind, 1)
+          }
+        },
+        gettotalprice() {
+          let result = 0;
+          for (let i = 0; i < this.store.items.length; i++) {
+            result += this.store.items[i].book.price * this.store.items[i].quantity;
+          }
+          return result;
+        }
+      }
+    })
+
+    app.mount("#box-container");
+
+  </script>
 </body>
 
 </html>
