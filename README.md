@@ -2,6 +2,11 @@
 
 # shopping-cart
 
+## DEMO 
+
+![Shopping Cart](./src/assets/VueJSlab-03.gif)
+
+
 ## Project setup
 ```
 npm install
